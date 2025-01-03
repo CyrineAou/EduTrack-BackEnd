@@ -4,6 +4,18 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth import authenticate
 
+from api.models.grade import Grade
+from api.models.user import CustomUser
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ['id', 'username', 'role', 'password']
+        extra_kwargs = {'password': {'write_only': True}}
+
+    def create(self, validated_data):
+        user = CustomUser.objects.create_user(**validated_data)
+        return user
 # Sérialiseur pour l'enregistrement d'un utilisateur
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True)
@@ -33,6 +45,7 @@ class RegisterSerializer(serializers.ModelSerializer):
             role=validated_data['role']
         )
         return user
+    
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField()
     password = serializers.CharField()
@@ -45,3 +58,19 @@ class LoginSerializer(serializers.Serializer):
 
         attrs['user'] = user
         return attrs
+    
+class GradeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Grade
+        fields = ['id', 'student', 'subject', 'score', 'date']
+        
+class StudentGradeReportSerializer(serializers.ModelSerializer):
+    grades = serializers.SerializerMethodField()
+
+    class Meta:
+        model = CustomUser
+        fields = ['id', 'username', 'grades']
+
+    def get_grades(self, obj):
+        grades = Grade.objects.filter(student=obj)
+        return GradeSerializer(grades, many=True).data

@@ -43,6 +43,9 @@ INSTALLED_APPS = [
 ]
 # Add custom user model
 AUTH_USER_MODEL = 'api.CustomUser' 
+CSRF_COOKIE_SECURE = False  # True en production avec HTTPS
+CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1:8000']  # Ajoutez votre domaine local ou public
+
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.SessionAuthentication',
@@ -52,7 +55,6 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.AllowAny',
     ],
 }
-
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
